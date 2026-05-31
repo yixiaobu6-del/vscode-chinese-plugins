@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VS Code 中文插件一键安装</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-4xl mx-auto p-4 md:p-6">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl md:text-3xl font-bold mb-2"><i class="fa fa-puzzle-piece text-blue-600"></i> VS Code 中文插件一键安装</h1>
+      <p class="text-gray-500">选择需要的插件，一键复制安装命令 | 点击插件卡片查看详情</p>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button onclick="selectAll()" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"><i class="fa fa-check-square-o"></i> 全选</button>
+        <button onclick="clearAll()" class="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"><i class="fa fa-square-o"></i> 清空</button>
+        <button onclick="copyCommand()" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"><i class="fa fa-copy"></i> 复制命令</button>
+        <button onclick="copyShell()" class="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600"><i class="fa fa-file-code-o"></i> 复制脚本</button>
+      </div>
+
+      <!-- 搜索框 -->
+      <div class="mb-4">
+        <label class="text-sm font-medium">搜索插件：</label>
+        <input type="text" id="searchInput" oninput="filterPlugins()" class="w-full border rounded px-3 py-2 mt-1" placeholder="输入插件名称或描述搜索...">
+      </div>
+
+      <!-- 快速筛选 -->
+      <div class="mb-4">
+        <label class="text-sm font-medium">快速筛选：</label>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          <button onclick="filterBy('全部')" class="filter-btn px-2 py-1 bg-blue-500 text-white rounded text-sm">全部</button>
+          <button onclick="filterBy('编码效率')" class="filter-btn px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">编码效率</button>
+          <button onclick="filterBy('Git协作')" class="filter-btn px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">Git协作</button>
+          <button onclick="filterBy('Markdown')" class="filter-btn px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">Markdown</button>
+          <button onclick="filterBy('Python')" class="filter-btn px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">Python</button>
+          <button onclick="filterBy('前端')" class="filter-btn px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">前端</button>
+          <button onclick="filterBy('效率')" class="filter-btn px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200">效率工具</button>
+        </div>
+      </div>
+
+      <!-- 开发场景组合推荐 -->
+      <div class="mb-4">
+        <label class="text-sm font-medium">开发场景组合推荐：</label>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          <button onclick="selectCombo('frontend')" class="combo-btn px-3 py-2 bg-orange-100 text-orange-700 rounded text-sm hover:bg-orange-200"><i class="fa fa-html5"></i> 前端开发</button>
+          <button onclick="selectCombo('backend')" class="combo-btn px-3 py-2 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"><i class="fa fa-server"></i> 后端开发</button>
+          <button onclick="selectCombo('python')" class="combo-btn px-3 py-2 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"><i class="fa fa-python"></i> Python</button>
+          <button onclick="selectCombo('fullstack')" class="combo-btn px-3 py-2 bg-purple-100 text-purple-700 rounded text-sm hover:bg-purple-200"><i class="fa fa-cubes"></i> 全栈</button>
+          <button onclick="selectCombo('writer')" class="combo-btn px-3 py-2 bg-teal-100 text-teal-700 rounded text-sm hover:bg-teal-200"><i class="fa fa-file-text"></i> 文档写作</button>
+        </div>
+        <div id="comboDesc" class="mt-2 text-xs text-gray-500 hidden"></div>
+      </div>
+
+      <!-- 已安装统计 -->
+      <div class="text-sm text-gray-500">
+        已选择 <strong id="selectedCount">0</strong> 个插件 |
+        已标记安装 <strong id="installedCount">0</strong> 个
+      </div>
+    </div>
+
+    <!-- 插件列表 -->
+    <div id="pluginsList" class="space-y-3 mb-4"></div>
+
+    <!-- 生成的命令 -->
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+      <h3 class="font-bold mb-2">生成的安装命令</h3>
+      <pre id="commandOutput" class="bg-gray-900 text-green-400 p-3 rounded text-sm overflow-x-auto whitespace-pre-wrap">选择插件后自动生成</pre>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
+        <div class="flex justify-between items-start mb-4">
+          <h3 id="modalTitle" class="font-bold text-lg"></h3>
+          <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fa fa-times"></i></button>
+        </div>
+        <div id="modalBody" class="space-y-4"></div>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a id="modalVscodeLink" href="#" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"><i class="fa fa-download"></i> VS Code一键安装</a>
+          <button onclick="markInstalledFromModal()" class="bg-green-500 text-white px-4 py-2 rounded text-sm hover:bg-green-600"><i class="fa fa-check"></i> 标记已安装</button>
+          <a id="modalLink" href="#" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600"><i class="fa fa-external-link"></i> Marketplace</a>
+          <button onclick="closeModal()" class="bg-gray-200 text-gray-600 px-4 py-2 rounded text-sm hover:bg-gray-300">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============== 21个插件完整信息 ==============
+    const plugins = [
+      { id: 'MS-CEINTL.vscode-language-pack-zh-hans', name: '中文语言包', cat: '编码效率', desc: 'VS Code中文界面',
+        detail: { fullName: 'Chinese (Simplified) Language Pack for Visual Studio Code', function: '将VS Code界面翻译为简体中文，包括菜单、命令、提示等所有界面元素。', scene: '适合中文用户使用，提升操作效率。', tips: '安装后需要重启VS Code生效。' }},
+      { id: 'GitHub.copilot', name: 'GitHub Copilot', cat: '编码效率', desc: 'AI代码补全',
+        detail: { fullName: 'GitHub Copilot', function: '基于AI的智能代码补全工具，支持多种编程语言，可自动生成代码、函数、注释等。', scene: '适合各类开发者，提升编码效率。', tips: '需要GitHub订阅，每月$10或GitHub Pro用户免费。' }},
+      { id: 'Codeium.codeium', name: 'Codeium', cat: '编码效率', desc: '免费AI代码补全',
+        detail: { fullName: 'Codeium - Free AI Code Completion', function: '免费的AI代码补全工具，支持40+语言，提供智能代码建议和补全。', scene: '适合追求免费AI辅助的开发者。', tips: '免费使用，无需订阅，支持多语言。' }},
+      { id: 'usernamehw.errorlens', name: 'Error Lens', cat: '编码效率', desc: '行内显示错误',
+        detail: { fullName: 'Error Lens', function: '在代码行内直接显示错误、警告和诊断信息，无需打开问题面板。', scene: '适合需要快速定位错误的开发者。', tips: '可配置显示级别和样式。' }},
+      { id: 'CoenraadS.bracket-pair-colorizer-2', name: 'Bracket Pair', cat: '编码效率', desc: '括号颜色区分',
+        detail: { fullName: 'Bracket Pair Colorizer 2', function: '为匹配的括号添加不同颜色，帮助快速识别嵌套结构。', scene: '适合处理复杂嵌套代码的开发者。', tips: '支持自定义颜色方案。' }},
+      { id: 'eamodio.gitlens', name: 'GitLens', cat: 'Git协作', desc: 'Git增强工具',
+        detail: { fullName: 'GitLens — Git supercharged', function: '强大的Git扩展，显示代码作者、提交历史、比较差异、分支可视化等功能。', scene: '团队协作和代码历史追溯必备。', tips: '功能丰富，可根据需求选择性启用。' }},
+      { id: 'mhutchie.git-graph', name: 'Git Graph', cat: 'Git协作', desc: 'Git分支可视化',
+        detail: { fullName: 'Git Graph', function: '可视化Git分支和提交历史，支持交互式操作：合并、检出、创建分支等。', scene: '适合需要管理复杂分支结构的项目。', tips: '与GitLens配合使用效果更佳。' }},
+      { id: 'GitHub.vscode-pull-request-github', name: 'GitHub PR', cat: 'Git协作', desc: 'GitHub PR集成',
+        detail: { fullName: 'GitHub Pull Requests and Issues', function: '在VS Code内直接查看、创建、管理GitHub Pull Requests和Issues。', scene: 'GitHub项目协作必备，无需切换浏览器。', tips: '需要配置GitHub账号授权。' }},
+      { id: 'yzhang.markdown-all-in-one', name: 'Markdown All in One', cat: 'Markdown', desc: 'Markdown快捷键',
+        detail: { fullName: 'Markdown All in One', function: '提供Markdown编辑快捷键：加粗、斜体、列表、标题等，支持实时预览和自动补全。', scene: 'Markdown文档编写必备。', tips: '支持自定义快捷键映射。' }},
+      { id: 'shd101wyy.markdown-preview-enhanced', name: 'Markdown Preview Enhanced', cat: 'Markdown', desc: '增强预览',
+        detail: { fullName: 'Markdown Preview Enhanced', function: '增强的Markdown预览，支持数学公式、流程图、代码块执行、导出PDF等功能。', scene: '技术文档、学术写作必备。', tips: '支持Mermaid、LaTeX等多种扩展语法。' }},
+      { id: 'DavidAnson.vscode-markdownlint', name: 'markdownlint', cat: 'Markdown', desc: 'Markdown规范检查',
+        detail: { fullName: 'markdownlint', function: '检查Markdown文档格式规范，统一写作风格，提示格式问题。', scene: '团队协作文档规范化必备。', tips: '可自定义规则配置。' }},
+      { id: 'ms-python.python', name: 'Python', cat: 'Python', desc: 'Python官方插件',
+        detail: { fullName: 'Python', function: '官方Python扩展，提供调试、智能补全、代码格式化、代码导航等功能。', scene: 'Python开发必备基础插件。', tips: '需配合Pylance获得最佳体验。' }},
+      { id: 'ms-python.vscode-pylance', name: 'Pylance', cat: 'Python', desc: 'Python类型检查',
+        detail: { fullName: 'Pylance', function: '高性能Python语言服务器，提供智能类型检查、自动补全、签名帮助等。', scene: 'Python开发必备，提升编码体验。', tips: '微软官方，与Python插件配合使用。' }},
+      { id: 'ms-python.black-formatter', name: 'Black Formatter', cat: 'Python', desc: 'Python格式化',
+        detail: { fullName: 'Black Formatter', function: '使用Black自动格式化Python代码，统一代码风格。', scene: '追求代码风格统一的Python开发者。', tips: '需要先安装Black包：pip install black。' }},
+      { id: 'dbaeumer.vscode-eslint', name: 'ESLint', cat: '前端', desc: 'JS代码检查',
+        detail: { fullName: 'ESLint', function: 'JavaScript/TypeScript代码规范检查，提示语法错误和风格问题。', scene: '前端开发必备，代码质量保障。', tips: '需要项目配置ESLint规则文件。' }},
+      { id: 'esbenp.prettier-vscode', name: 'Prettier', cat: '前端', desc: '代码格式化',
+        detail: { fullName: 'Prettier - Code formatter', function: '代码自动格式化工具，支持JS、TS、CSS、HTML、JSON等多种语言。', scene: '前端开发必备，统一代码风格。', tips: '可与ESLint配合使用。' }},
+      { id: 'formulahendry.auto-rename-tag', name: 'Auto Rename Tag', cat: '前端', desc: '自动重命名标签',
+        detail: { fullName: 'Auto Rename Tag', function: '自动同步修改HTML/XML标签的开头和结尾标签。', scene: 'HTML/XML编辑效率提升必备。', tips: '支持多种标签类型。' }},
+      { id: 'bradlc.vscode-tailwindcss', name: 'Tailwind CSS', cat: '前端', desc: 'Tailwind智能提示',
+        detail: { fullName: 'Tailwind CSS IntelliSense', function: 'Tailwind CSS智能提示，包括类名补全、CSS预览、语法高亮等。', scene: '使用Tailwind CSS的前端开发者必备。', tips: '支持自定义配置和类名排序。' }},
+      { id: 'christian-korn.path-intellisense', name: 'Path Intellisense', cat: '效率', desc: '路径自动补全',
+        detail: { fullName: 'Path Intellisense', function: '自动补全文件路径，支持相对路径和绝对路径。', scene: '频繁引用文件路径的开发场景。', tips: '可配置映射规则。' }},
+      { id: 'Gruntfuggly.todo-tree', name: 'Todo Tree', cat: '效率', desc: 'TODO列表视图',
+        detail: { fullName: 'Todo Tree', function: '扫描代码中的TODO、FIXME等注释标签，集中显示在树形视图中。', scene: '任务管理和代码维护必备。', tips: '可自定义标签和颜色。' }},
+      { id: 'alefragnani.Bookmarks', name: 'Bookmarks', cat: '效率', desc: '代码书签',
+        detail: { fullName: 'Bookmarks', function: '在代码行添加书签，快速跳转到标记位置，支持书签列表管理。', scene: '大型项目代码导航效率提升。', tips: '支持书签分组和导出。' }}
+    ];
+
+    const selected = {};
+    const installed = JSON.parse(localStorage.getItem('vscodeInstalled') || '{}');
+    let currentFilter = '全部';
+    let currentModalPlugin = null;
+
+    // ============== 初始化 ==============
+    function init() {
+      buildList();
+      updateInstalledCount();
+    }
+
+    // ============== 构建列表 ==============
+    function buildList() {
+      const container = document.getElementById('pluginsList');
+      container.innerHTML = '';
+
+      const searchText = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = plugins.filter(p => {
+        const matchCat = currentFilter === '全部' || p.cat === currentFilter;
+        const matchSearch = !searchText || p.name.toLowerCase().includes(searchText) || p.desc.toLowerCase().includes(searchText);
+        return matchCat && matchSearch;
+      });
+
+      filtered.forEach(p => {
+        const isChecked = selected[p.id] || false;
+        const isInstalled = installed[p.id] || false;
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition border-l-4 ' + (isInstalled ? 'border-green-500' : 'border-blue-500');
+        div.onclick = () => showDetail(p);
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <input type="checkbox" id="cb_${p.id}" ${isChecked ? 'checked' : ''} onchange="toggle('${p.id}')" onclick="event.stopPropagation()" class="w-4 h-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-medium">${p.name}</span>
+                ${isInstalled ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs"><i class="fa fa-check"></i> 已安装</span>' : ''}
+              </div>
+              <div class="text-sm text-gray-500">${p.desc}</div>
+              <div class="text-xs text-gray-400 mt-1"><i class="fa fa-tag"></i> ${p.cat} | <i class="fa fa-info-circle"></i> 点击查看详情</div>
+            </div>
+            <button onclick="event.stopPropagation();toggle('${p.id}')" class="text-xs ${isChecked ? 'text-blue-600' : 'text-gray-400'}">
+              <i class="fa ${isChecked ? 'fa-check-square' : 'fa-square-o'}"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      updateCommand();
+      updateSelectedCount();
+      updateFilterButtons();
+    }
+
+    // ============== 切换选中 ==============
+    function toggle(id) {
+      selected[id] = !selected[id];
+      document.getElementById('cb_' + id).checked = selected[id];
+      updateCommand();
+      updateSelectedCount();
+    }
+
+    function selectAll() {
+      plugins.forEach(p => { selected[p.id] = true; });
+      buildList();
+    }
+
+    function clearAll() {
+      plugins.forEach(p => { selected[p.id] = false; });
+      buildList();
+    }
+
+    // ============== 筛选 ==============
+    function filterBy(cat) {
+      currentFilter = cat;
+      buildList();
+    }
+
+    function filterPlugins() {
+      buildList();
+    }
+
+    function updateFilterButtons() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.className = 'filter-btn px-2 py-1 rounded text-sm ' + (btn.textContent === currentFilter ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200');
+      });
+    }
+
+    // ============== 更新命令 ==============
+    function updateCommand() {
+      const ids = Object.keys(selected).filter(id => selected[id]);
+      if (ids.length === 0) {
+        document.getElementById('commandOutput').textContent = '选择插件后自动生成安装命令';
+        return;
+      }
+      const cmd = ids.map(id => `code --install-extension ${id} --force`).join('\n');
+      document.getElementById('commandOutput').textContent = cmd;
+    }
+
+    function updateSelectedCount() {
+      const count = Object.keys(selected).filter(id => selected[id]).length;
+      document.getElementById('selectedCount').textContent = count;
+    }
+
+    function updateInstalledCount() {
+      const count = Object.keys(installed).length;
+      document.getElementById('installedCount').textContent = count;
+    }
+
+    // ============== 开发场景组合推荐 ==============
+    const COMBOS = {
+      frontend: {
+        name: '前端开发',
+        desc: 'HTML/CSS/JS/React/Vue 前端开发必备插件组合',
+        ids: ['dbaeumer.vscode-eslint','esbenp.prettier-vscode','formulahendry.auto-rename-tag','bradlc.vscode-tailwindcss','christian-korn.path-intellisense','GitHub.copilot','CoenraadS.bracket-pair-colorizer-2','usernamehw.errorlens']
+      },
+      backend: {
+        name: '后端开发',
+        desc: 'Java/Go/Node.js/PHP 后端开发必备插件组合',
+        ids: ['eamodio.gitlens','mhutchie.git-graph','GitHub.copilot','usernamehw.errorlens','CoenraadS.bracket-pair-colorizer-2','christian-korn.path-intellisense','GitHub.vscode-pull-request-github','Gruntfuggly.todo-tree']
+      },
+      python: {
+        name: 'Python开发',
+        desc: 'Python 数据分析/Web开发必备插件组合',
+        ids: ['ms-python.python','ms-python.vscode-pylance','ms-python.black-formatter','eamodio.gitlens','usernamehw.errorlens','GitHub.copilot','christian-korn.path-intellisense']
+      },
+      fullstack: {
+        name: '全栈开发',
+        desc: '前端+后端+Docker/数据库全栈开发组合',
+        ids: ['ms-python.python','dbaeumer.vscode-eslint','esbenp.prettier-vscode','eamodio.gitlens','GitHub.copilot','bradlc.vscode-tailwindcss','formulahendry.auto-rename-tag','CoenraadS.bracket-pair-colorizer-2','usernamehw.errorlens','christian-korn.path-intellisense']
+      },
+      writer: {
+        name: '文档写作',
+        desc: '技术文档/Markdown 写作必备插件组合',
+        ids: ['yzhang.markdown-all-in-one','shd101wyy.markdown-preview-enhanced','DavidAnson.vscode-markdownlint','eamodio.gitlens','Gruntfuggly.todo-tree','MS-CEINTL.vscode-language-pack-zh-hans']
+      }
+    };
+
+    function selectCombo(key) {
+      const combo = COMBOS[key];
+      if (!combo) return;
+
+      // 清除当前选中
+      Object.keys(selected).forEach(k => selected[k] = false);
+
+      // 选中组合里的插件
+      combo.ids.forEach(id => { selected[id] = true; });
+
+      // 显示组合描述
+      const desc = document.getElementById('comboDesc');
+      desc.classList.remove('hidden');
+      desc.innerHTML = `<i class="fa fa-info-circle text-blue-500"></i> 已选择 <strong>${combo.name}</strong> 场景：${combo.desc}（${combo.ids.length}个插件）`;
+      filterBy('全部');
+      document.getElementById('searchInput').value = '';
+      buildList();
+    }
+
+    // ============== 复制 ==============
+    function copyCommand() {
+      const ids = Object.keys(selected).filter(id => selected[id]);
+      if (ids.length === 0) { alert('请先选择插件'); return; }
+      const cmd = ids.map(id => `code --install-extension ${id} --force`).join('\n');
+      copyText(cmd, '已复制安装命令');
+    }
+
+    function copyShell() {
+      const ids = Object.keys(selected).filter(id => selected[id]);
+      if (ids.length === 0) { alert('请先选择插件'); return; }
+      const sh = `#!/bin/bash
+# VS Code 中文插件一键安装脚本
+
+PLUGINS=(
+${ids.map(id => `    "${id}"`).join('\n')}
+)
+
+for plugin in "${PLUGINS[@]}"; do
+    echo "安装: $plugin"
+    code --install-extension "$plugin" --force
+done
+
+echo "安装完成，请重启 VS Code"
+`;
+      copyText(sh, '已复制Shell脚本');
+    }
+
+    function copyText(text, msg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => alert(msg)).catch(() => fallbackCopy(text, msg));
+      } else {
+        fallbackCopy(text, msg);
+      }
+    }
+
+    function fallbackCopy(text, msg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); alert(msg); } catch(e) { alert('复制失败，请手动复制'); }
+      document.body.removeChild(ta);
+    }
+
+    // ============== 详情弹窗 ==============
+    function showDetail(p) {
+      currentModalPlugin = p;
+      document.getElementById('modalTitle').textContent = p.name;
+      document.getElementById('modalBody').innerHTML = `
+        <div class="bg-gray-50 rounded p-3">
+          <div class="text-xs text-gray-500 mb-1">完整名称</div>
+          <div class="font-medium text-sm">${p.detail.fullName}</div>
+        </div>
+        <div class="bg-blue-50 rounded p-3">
+          <div class="text-xs text-blue-500 mb-1"><i class="fa fa-cog"></i> 功能说明</div>
+          <div class="text-sm">${p.detail.function}</div>
+        </div>
+        <div class="bg-green-50 rounded p-3">
+          <div class="text-xs text-green-500 mb-1"><i class="fa fa-lightbulb-o"></i> 适用场景</div>
+          <div class="text-sm">${p.detail.scene}</div>
+        </div>
+        <div class="bg-yellow-50 rounded p-3">
+          <div class="text-xs text-yellow-600 mb-1"><i class="fa fa-info-circle"></i> 使用提示</div>
+          <div class="text-sm">${p.detail.tips}</div>
+        </div>
+        <div class="text-xs text-gray-500">
+          <i class="fa fa-tag"></i> 分类：${p.cat} | ID：${p.id}
+        </div>
+      `;
+      document.getElementById('modalLink').href = `https://marketplace.visualstudio.com/items?itemName=${p.id}`;
+      document.getElementById('modalVscodeLink').href = `vscode:extension/${p.id}`;
+      document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+      currentModalPlugin = null;
+    }
+
+    function markInstalledFromModal() {
+      if (!currentModalPlugin) return;
+      installed[currentModalPlugin.id] = true;
+      localStorage.setItem('vscodeInstalled', JSON.stringify(installed));
+      updateInstalledCount();
+      buildList();
+      closeModal();
+      alert('已标记为安装');
+    }
+
+    // ============== 点击弹窗外部关闭 ==============
+    document.getElementById('detailModal').onclick = function(e) {
+      if (e.target === this) closeModal();
+    };
+
+    init();
+  </script>
+</body>
+</html>

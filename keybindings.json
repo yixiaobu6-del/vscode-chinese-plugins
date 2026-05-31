@@ -1,0 +1,245 @@
+// ============================================
+// VS Code 推荐快捷键绑定（中文开发者版）
+// ============================================
+// 用法：打开命令面板 (Cmd+Shift+P) → "Preferences: Open Keyboard Shortcuts (JSON)"
+// 将内容粘贴进去
+
+[
+  // ---------- 编辑器操作 ----------
+  {
+    "key": "cmd+d",
+    "command": "editor.action.addSelectionToNextFindMatch",
+    "when": "editorFocus"
+  },
+  {
+    "key": "cmd+shift+l",
+    "command": "editor.action.selectHighlights",
+    "when": "editorFocus"
+  },
+  {
+    "key": "alt+up",
+    "command": "editor.action.moveLinesUpAction",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+down",
+    "command": "editor.action.moveLinesDownAction",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "shift+alt+up",
+    "command": "editor.action.insertCursorAbove",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "shift+alt+down",
+    "command": "editor.action.insertCursorBelow",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+backspace",
+    "command": "editor.action.deleteLines",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+enter",
+    "command": "editor.action.insertLineAfter",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "cmd+shift+enter",
+    "command": "editor.action.insertLineBefore",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+
+  // ---------- 代码导航 ----------
+  {
+    "key": "ctrl+-",
+    "command": "workbench.action.navigateBack"
+  },
+  {
+    "key": "ctrl+shift+-",
+    "command": "workbench.action.navigateForward"
+  },
+  {
+    "key": "f12",
+    "command": "editor.action.goToDefinition"
+  },
+  {
+    "key": "shift+f12",
+    "command": "editor.action.referenceSearch.trigger"
+  },
+  {
+    "key": "alt+f12",
+    "command": "editor.action.peekDefinition"
+  },
+  {
+    "key": "ctrl+g",
+    "command": "workbench.action.gotoLine"
+  },
+
+  // ---------- 搜索与替换 ----------
+  {
+    "key": "cmd+shift+f",
+    "command": "search.action.openNewEditor"
+  },
+  {
+    "key": "cmd+shift+h",
+    "command": "editor.action.startFindReplaceAction"
+  },
+  {
+    "key": "cmd+alt+f",
+    "command": "editor.action.formatDocument"
+  },
+
+  // ---------- 终端 ----------
+  {
+    "key": "ctrl+`",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "ctrl+shift+`",
+    "command": "workbench.action.terminal.newWithCwd"
+  },
+  {
+    "key": "cmd+k",
+    "command": "workbench.action.terminal.clear",
+    "when": "terminalFocus"
+  },
+
+  // ---------- 文件与资源管理器 ----------
+  {
+    "key": "cmd+p",
+    "command": "workbench.action.quickOpen"
+  },
+  {
+    "key": "cmd+shift+p",
+    "command": "workbench.action.showCommands"
+  },
+  {
+    "key": "cmd+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "cmd+w",
+    "command": "workbench.action.closeActiveEditor"
+  },
+  {
+    "key": "cmd+shift+w",
+    "command": "workbench.action.closeWindow"
+  },
+  {
+    "key": "cmd+\\",
+    "command": "workbench.action.splitEditor"
+  },
+
+  // ---------- 代码折叠 ----------
+  {
+    "key": "cmd+alt+[",
+    "command": "editor.foldAll"
+  },
+  {
+    "key": "cmd+alt+]",
+    "command": "editor.unfoldAll"
+  },
+  {
+    "key": "cmd+[",
+    "command": "editor.fold"
+  },
+  {
+    "key": "cmd+]",
+    "command": "editor.unfold"
+  },
+
+  // ---------- Git ----------
+  {
+    "key": "cmd+shift+g",
+    "command": "workbench.view.scm"
+  },
+  {
+    "key": "alt+g c",
+    "command": "git.commit",
+    "when": "workbench.scm.active"
+  },
+  {
+    "key": "alt+g p",
+    "command": "git.push",
+    "when": "workbench.scm.active"
+  },
+
+  // ---------- 面板 ----------
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "cmd+shift+e",
+    "command": "workbench.view.explorer"
+  },
+  {
+    "key": "cmd+shift+x",
+    "command": "workbench.view.extensions"
+  },
+
+  // ---------- 书签 ----------
+  {
+    "key": "alt+cmd+k",
+    "command": "bookmarks.toggle"
+  },
+  {
+    "key": "alt+cmd+l",
+    "command": "bookmarks.jumpToNext"
+  },
+  {
+    "key": "alt+cmd+j",
+    "command": "bookmarks.jumpToPrevious"
+  },
+
+  // ---------- 多光标编辑 ----------
+  {
+    "key": "cmd+shift+arrowUp",
+    "command": "cursorColumnSelectUp",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+shift+arrowDown",
+    "command": "cursorColumnSelectDown",
+    "when": "editorTextFocus"
+  },
+
+  // ---------- 调试 ----------
+  {
+    "key": "f5",
+    "command": "workbench.action.debug.start"
+  },
+  {
+    "key": "shift+f5",
+    "command": "workbench.action.debug.stop"
+  },
+  {
+    "key": "f9",
+    "command": "editor.debug.action.toggleBreakpoint"
+  },
+  {
+    "key": "f10",
+    "command": "workbench.action.debug.stepOver"
+  },
+  {
+    "key": "f11",
+    "command": "workbench.action.debug.stepInto"
+  },
+  {
+    "key": "shift+f11",
+    "command": "workbench.action.debug.stepOut"
+  },
+
+  // ---------- Markdown 预览 ----------
+  {
+    "key": "cmd+shift+v",
+    "command": "markdown.showPreview"
+  },
+  {
+    "key": "cmd+k v",
+    "command": "markdown.showPreviewToSide"
+  }
+]
